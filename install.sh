@@ -10,8 +10,9 @@ sudo apt install build-essential  scons zlib1g-dev m4 swig python-pip python-vir
 # Make python environment
 mkdir $HOME/.pyenv; cd $HOME/.pyenv
 sudo virtualenv -p "/usr/bin/python2.7" gem5 &&
+sudo chmod 0777 "$HOME/.pyenv/gem5" &&
 source "gem5/bin/activate" &&
-sudo pip install six scons
+pip install six scons
 
 # Build
 cd $INS_PATH/gem5
