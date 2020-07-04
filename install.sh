@@ -5,15 +5,24 @@ INS_PATH=$(pwd)
 
 # Install packages
 sudo apt update && sudo apt upgrade
-sudo apt install build-essential  scons zlib1g-dev m4 swig python-pip python-virtualenv
+sudo apt install build-essential scons zlib1g-dev m4 swig python-pip python-virtualenv
+sudo pip install scons six
 
 # Make python environment
-mkdir $HOME/.pyenv; cd $HOME/.pyenv
+cd $HOME/.pyenv || mkdir $HOME/.pyenv; cd $HOME/.pyenv
+sudo rm -rf gem5
 sudo virtualenv -p "/usr/bin/python2.7" --system-site-packages gem5 &&
-sudo chmod 0777 "$HOME/.pyenv/gem5" &&
+sudo chmod -R 0777 "$HOME/.pyenv/gem5" &&
 source "gem5/bin/activate" &&
+which pip
 pip install six scons
 
 # Build
 cd $INS_PATH/gem5
-scons build/ARM/gem5.opt -j $(nproc) --ignore-style
+scons build/ARM/gem5.opt -j $(nproc) --ignore-style &&
+
+# Run simulation
+./build/ARM/gem5.opt --outdir="../results/LRU/1" configs/finalProj/two-level.py --cpu_clock=2GHz --bench_1 --cache_LRU --thread_max=10000000 &
+./build/ARM/gem5.opt --outdir="../results/LRU/2" configs/finalProj/two-level.py --cpu_clock=2GHz --bench_2 --cache_LRU --thread_max=10000000 ;
+./build/ARM/gem5.opt --outdir="../results/LRU/3" configs/finalProj/two-level.py --cpu_clock=2GHz --bench_3 --cache_LRU --thread_max=10000000 &
+./build/ARM/gem5.opt --outdir="../results/LRU/4" configs/finalProj/two-level.py --cpu_clock=2GHz --bench_4 --cache_LRU --thread_max=10000000 
