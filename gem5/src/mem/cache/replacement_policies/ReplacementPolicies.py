@@ -104,5 +104,5 @@ class WeightedLRURP(BaseReplacementPolicy):
     
 class RWPRP(BaseReplacementPolicy):
     type = 'RWPRP'
-    cxx_class = 'RWP'
+    cxx_class = 'RWPRP'
     cxx_header = "mem/cache/replacement_policies/rwp_rp.hh"
