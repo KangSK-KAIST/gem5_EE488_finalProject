@@ -1,76 +1,62 @@
-/**
- * Copyright (c) 2018 Inria
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met: redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer;
- * redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution;
- * neither the name of the copyright holders nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * Authors: Daniel Carvalho
+/*
+ * @title rwp_rp.hh
+ * Authors: KangSK
+ * Written at 20200703
  */
 
-/**
+/*
  * @file
- * Declaration of a Least Recently Used replacement policy.
- * The victim is chosen using the last touch timestamp.
+ * Header file of Read Write Partitioning Replacement Policy
+ * Using clean bits for each cache block, dynamically partition
+ * Read and Write Blocks to maximize read hits.
  */
 
-#ifndef __MEM_CACHE_REPLACEMENT_POLICIES_LRU_RP_HH__
-#define __MEM_CACHE_REPLACEMENT_POLICIES_LRU_RP_HH__
+#ifndef __MEM_CACHE_REPLACEMENT_POLICIES_RWP_RP_HH__
+#define __MEM_CACHE_REPLACEMENT_POLICIES_RWP_RP_HH__
 
 #include "mem/cache/replacement_policies/base.hh"
 
-struct LRURPParams;
+struct RWPRPParams;
 
-class LRURP : public BaseReplacementPolicy
+class RWPRP : public BaseReplacementPolicy
 {
   protected:
-    /** LRU-specific implementation of replacement data. */
-    struct LRUReplData : ReplacementData
+    // Data structures used for RWP
+    
+    // Data structure for each cache block
+    struct RWPReplData : ReplacementData
     {
-        /** Tick on which the entry was last touched. */
+        // Clean bit to track whether this is dirty or not
+
+        bool clean;
+        
+        // Tick on which the entry was last touched. (Used to find LRU)
         Tick lastTouchTick;
 
-        /**
-         * Default constructor. Invalidate data.
-         */
-        LRUReplData() : lastTouchTick(0) {}
+        // Default constructor
+        RWPReplData() : lastTouchTick(0) {}
     };
+    
+    // Data structure used globally by RWP
+    int estimatedClean;
+    
+    
 
   public:
-    /** Convenience typedef. */
-    typedef LRURPParams Params;
+    /* Convenience typedef. */
+    typedef RWPRPParams Params;
 
-    /**
+    /*
      * Construct and initiliaze this replacement policy.
      */
-    LRURP(const Params *p);
+    RWPRP(const Params *p);
 
-    /**
+    /*
      * Destructor.
      */
-    ~LRURP() {}
+    ~RWPRP() {}
 
-    /**
+    /*
      * Invalidate replacement data to set it as the next probable victim.
      * Sets its last touch tick as the starting tick.
      *
@@ -79,7 +65,7 @@ class LRURP : public BaseReplacementPolicy
     void invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
                                                               const override;
 
-    /**
+    /*
      * Touch an entry to update its replacement data.
      * Sets its last touch tick as the current tick.
      *
@@ -88,7 +74,7 @@ class LRURP : public BaseReplacementPolicy
     void touch(const std::shared_ptr<ReplacementData>& replacement_data) const
                                                                      override;
 
-    /**
+    /*
      * Reset replacement data. Used when an entry is inserted.
      * Sets its last touch tick as the current tick.
      *
@@ -97,8 +83,8 @@ class LRURP : public BaseReplacementPolicy
     void reset(const std::shared_ptr<ReplacementData>& replacement_data) const
                                                                      override;
 
-    /**
-     * Find replacement victim using LRU timestamps.
+    /*
+     * Find replacement victim using RWP timestamps.
      *
      * @param candidates Replacement candidates, selected by indexing policy.
      * @return Replacement entry to be replaced.
@@ -106,7 +92,7 @@ class LRURP : public BaseReplacementPolicy
     ReplaceableEntry* getVictim(const ReplacementCandidates& candidates) const
                                                                      override;
 
-    /**
+    /*
      * Instantiate a replacement data entry.
      *
      * @return A shared pointer to the new replacement data.
@@ -114,4 +100,4 @@ class LRURP : public BaseReplacementPolicy
     std::shared_ptr<ReplacementData> instantiateEntry() override;
 };
 
-#endif // __MEM_CACHE_REPLACEMENT_POLICIES_LRU_RP_HH__
+#endif // __MEM_CACHE_REPLACEMENT_POLICIES_RWP_RP_HH__
