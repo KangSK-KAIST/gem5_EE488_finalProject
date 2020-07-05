@@ -27,18 +27,24 @@ class RWPRP : public BaseReplacementPolicy
     struct RWPReplData : ReplacementData
     {
         // Clean bit to track whether this is dirty or not
-
-        bool clean;
+        bool bWriteOnly;
         
         // Tick on which the entry was last touched. (Used to find LRU)
-        Tick lastTouchTick;
+        Tick tLastTouchTick;
 
         // Default constructor
-        RWPReplData() : lastTouchTick(0) {}
+        RWPReplData() : lastTouchTick(0), clean(false) {}
     };
     
     // Data structure used globally by RWP
-    int estimatedClean;
+    int iTotalWriteOnly = 0;
+    int iTotalReadPoss = 0;
+    
+    int aCounterWriteOnly[32];
+    int aCounterReadPoss[32];
+    
+    double dEstBestRatio;
+    
     
     
 

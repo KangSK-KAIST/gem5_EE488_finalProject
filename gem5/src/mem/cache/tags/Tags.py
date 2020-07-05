@@ -126,3 +126,9 @@ class FALRU(BaseTags):
 
     # This tag uses its own embedded indexing
     indexing_policy = NULL
+"""
+class RWPTags(BaseSetAssoc):
+    type = 'RWPTags'
+    cxx_class = 'RWPTags'
+    cxx_header = "mem/cache/tages/rwp_tags.hh"
+"""    

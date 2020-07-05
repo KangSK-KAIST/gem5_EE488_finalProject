@@ -17,20 +17,20 @@ RWPRP::RWPRP(const Params *p)
 }
 
 void
+RWPRP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
+{
+    // Update last touch timestamp
+    std::static_pointer_cast<RWPReplData>(
+        replacement_data)->lastTouchTick = curTick();
+}
+
+void
 RWPRP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
 const
 {
     // Reset last touch timestamp
     std::static_pointer_cast<RWPReplData>(
         replacement_data)->lastTouchTick = Tick(0);
-}
-
-void
-RWPRP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
-{
-    // Update last touch timestamp
-    std::static_pointer_cast<RWPReplData>(
-        replacement_data)->lastTouchTick = curTick();
 }
 
 void
@@ -48,7 +48,7 @@ RWPRP::getVictim(const ReplacementCandidates& candidates) const
     assert(candidates.size() > 0);
 
     // Find whether we have to evict from dirty line or clean line
-    evictFromWhere
+    //evictFromWhere
     
     // Visit all candidates to find victim
     ReplaceableEntry* victim = candidates[0];
