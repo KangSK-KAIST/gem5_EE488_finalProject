@@ -10,14 +10,24 @@
 #include "mem/cache/base_set_assoc.hh"
 
 RWPTags::RWPTags(const Params *p)
-    : BaseSetAssoc(p),
-    iFlushCounter(0),
-    aHistoryBlock({0}), aSetSampleBlock({0}), aWriteOnlyBlock({0}),
-    iTotalWriteOnly(0xffffffff), iTotalReadPoss(0),
-    aSetQueueWriteOnly({0}), aSetQueueReadPoss({0}),
-    aCounterWriteOnly({0}), aCounterReadPoss({0}),
-    dEstBestRatio(0)
+    : BaseSetAssoc(p)
 {
+    this->iFlushCounter = 0;
+    this->aLastTouch = new int[numBlocks];
+    this->aWriteOnly = new bool[numBlocks];
+    this->iTotalWriteOnly = numBlocks;
+    this->iTotalReadPoss = 0;
+    this->aSetQueueWriteOnly = {0};
+    this->aSetQueueReadPoss = {0};
+    this->aCounterWriteOnly = {0};
+    this->aCounterReadPoss = {0};
+    this->dEstimBestRatio = 0.0;
+}
+
+RWPTags::~RWPTags()
+{
+    delete[] aLastTouch;
+    delete[] aWriteOnly;
 }
 
 void
@@ -72,15 +82,11 @@ RWPTags::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id)
     // Accesses are based on parent class, no need to do anything special
     BlkType *blk = BaseSetAssoc::accessBlock(addr, is_secure, lat, master_id);
     
-    if ( (bCleanBlock >> addr) % 2 == 1)
-    { // The block was write only
-        ++iTotalReadPoss;
-        --iTotalWriteOnly;
-        // When accessed, this block is not WriteOnly
-        bCleanBlock &= ((unsigned int)1) << ((addr << 32) >> 32);
-    }
-    
+    // Update iFlushCounter
     ++iFlushCounter;
+    
+    
+    
     return blk;
 }
 

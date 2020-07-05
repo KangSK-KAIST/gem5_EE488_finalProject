@@ -39,11 +39,9 @@ class RWPTags : public BaseSetAssoc
     // This counter flush the history and starts a new iteration of 
     int iFlushCounter;
     
-    // Variable with each bit as 1 if WriteOnly
-    int aHistoryBlock[32];
-    
-    int aSetSampleBlock[32];
-    bool aWriteOnlyBlock[32];
+    // Data structure per-block
+    int *aLastTouch;
+    bool *aWriteOnly;
     
     // Total number (current) of WriteOnly blocks and ReadPossible blocks
     int iTotalWriteOnly;
@@ -56,7 +54,7 @@ class RWPTags : public BaseSetAssoc
     int aCounterReadPoss[32];
     
     // Estimated Best ratio of WriteOnly blocks. value < [0, 1]
-    double dEstBestRatio;
+    double dEstimBestRatio;
     
     // Constructors
     RWPTags(const Params *p);
