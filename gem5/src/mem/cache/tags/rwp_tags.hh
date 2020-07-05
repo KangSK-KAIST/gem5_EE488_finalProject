@@ -36,9 +36,6 @@ class RWPTags : public BaseSetAssoc
 {
     // Data structure used globally by RWP
     
-    // This counter flush the history and starts a new iteration of 
-    int iFlushCounter;
-    
     // Data structure per-block
     int *aLastTouch;
     bool *aWriteOnly;
@@ -61,9 +58,9 @@ class RWPTags : public BaseSetAssoc
     ~RWPTags() {}
     
     // Helper Functions
-    void addToHistory(int iSet);
-    int updateQueue(int iSet);
-    double calculateBestRatio();
+    void shiftQueue(int *aQueue, int *aCounter, bool toHead);
+    void updateQueue(int *aQueue, int *aCounter, int iIndex, bool toHead);
+    void calculateBestRatio();
     
     
     BlkType* accessBlock(Addr addr, boll is_secure, Cycles &lat, int context_src);

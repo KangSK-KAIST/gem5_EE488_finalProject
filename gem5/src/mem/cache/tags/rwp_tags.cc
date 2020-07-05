@@ -12,7 +12,6 @@
 RWPTags::RWPTags(const Params *p)
     : BaseSetAssoc(p)
 {
-    this->iFlushCounter = 0;
     this->aLastTouch = new int[numBlocks];
     this->aWriteOnly = new bool[numBlocks];
     this->iTotalWriteOnly = numBlocks;
@@ -30,49 +29,76 @@ RWPTags::~RWPTags()
     delete[] aWriteOnly;
 }
 
+
 void
-RWPTags::addToHistory(int iSet)
+RWPTags::shiftQueue(int *aQueue, int *aCounter, bool toHead)
 {
-    int iFound = -1;
-    for (int i=0; i<32; i++)
+    if (toHead)
     {
-        if (aHistoryBlock[i] == iSet)
+        for (int i=31; i>0; --i)
         {
-            iFound = i;
+            aQueue[i] = aQueue[i-1];
+            aCounter[i] = aCounter[i-1];
         }
-    }
-     
-    if (iFound == -1)
-    { // New block accessed
-        for (int i=32; i>0; i--)
-        {
-            aHistoryBlock[i] = aHistoryBlock[i-1];
-        }
-        aHistoryBlock
+        aQueue[0] = 0;
+        aCounter[0] = 0;
     }
     else
-    { // Block already in history
-        
-    }
-    
-}
-
-int
-RWPTags::updateQueue(int iSet)
-{
-    for (int i=0; i<32; i++)
     {
-        if (aSetQueueWriteOnly[i] == iSet)
+        for (int i=0; i<31; ++i)
         {
-            
+            aQueue[i] = aQueue[i+1];
+            aCounter[i] = aCounter[i+1];
         }
+        aQueue[32] = 0;
+        aCounter[32] = 0;
     }
 }
 
-double
+
+void
+RWPTags::updateQueue(int *aQueue, int *aCounter, int iIndex, bool toHead)
+{
+    int iQueue = aQueue[iIndex];
+    int iCounter = aCounter[iIndex];
+    
+    if (toHead)
+    {
+        for (int i=iIndex; i>0; --i)
+        {
+            aQueue[i] = aQueue[i-1];
+            aCounter[i] = aCounter[i-1];
+        }
+        aQueue[0] = iQueue;
+        aCounter[0] = iCounter;
+    }
+    else
+    {
+        for (int i=iIndex; i<31; ++i)
+        {
+            aQueue[i] = aQueue[i+1];
+            aCounter[i] = aCounter[i+1];
+        }
+        aQueue[32] = iQueue;
+        aCounter[32] = iCounter;
+    }
+}
+
+
+void
 RWPTags::calculateBestRatio()
 {
+    int iWO = 0;
+    for (int i=0; i<32; ++i)
+    {
+        if (aCounterWriteOnly[i] > aCounterReadPoss[i])
+        {
+            ++iWO;
+        }
+    }
     
+    dEstimBestRatio = 32.0;
+    dEstimBestRatio /= (double)iWO;
 }
 
 
@@ -81,10 +107,23 @@ RWPTags::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id)
 {
     // Accesses are based on parent class, no need to do anything special
     BlkType *blk = BaseSetAssoc::accessBlock(addr, is_secure, lat, master_id);
-    
-    // Update iFlushCounter
-    ++iFlushCounter;
-    
+
+    for (int i=0; i<numBlocks; ++i)
+    {
+        if (aSetQueueWriteOnly[i] == blk.set)
+        { // Originally WO
+            ++aCounterWriteOnly[i];
+            updateQueue(aSetQueueWriteOnly, aCounterWriteOnly, i, true);
+            break;
+        }
+        if (aSetQueueReadPoss[i] == blk.set)
+        { // Originally RP
+            ++aCounterWriteOnly[i];
+            updateQueue(aSetQueueWriteOnly, aCounterWriteOnly, i, true);
+            break;
+        }
+        
+    }
     
     
     return blk;

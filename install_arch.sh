@@ -4,12 +4,12 @@
 INS_PATH=$(pwd)
 
 # Install packages
-sudo pacman -Syu build-essential scons python-dev zlib1g-dev m4 swig libprotobuf-dev protobuf-compiler libgoogle-perftools-dev python-pip python-virtualenv python-six
+sudo pacman -Syu gcc scons python-dev zlib m4 swig protobuf gperftools python-pip python-virtualenv python-six python2
 
 # Make python environment
 cd $HOME/.pyenv || mkdir $HOME/.pyenv; cd $HOME/.pyenv
 sudo rm -rf gem5
-sudo virtualenv -p "/usr/bin/python2.7" gem5 &&
+sudo virtualenv -p "/usr/bin/python2" gem5 &&
 sudo chmod -R 0777 "$HOME/.pyenv/gem5" &&
 source "gem5/bin/activate" &&
 
