@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+
 #include "base/bitfield.hh"
 #include "base/intmath.hh"
 #include "base/logging.hh"
@@ -28,45 +29,48 @@
 #include "base/refcnt.hh"
 #include "mem/cache/cache_blk.hh"
 #include "mem/cache/tags/base_set_assoc.hh"
+#include "mem/cache/tags/indexing_policies/set_associative.hh"
+#include "mem/cache/tags/indexing_policies/base.hh"
+#include "params/SetAssociative.hh"
 #include "mem/packet.hh"
 #include "params/RWPTags.hh"
 
 
 class RWPTags : public BaseSetAssoc
 {
-    // Data structure used globally by RWP
+    public:
+    
     
     // Data structure per-block
-    int *aLastTouch;
+    Tick *aLastTouch;
     bool *aWriteOnly;
+    
+    // Data structure used globally by RWP
     
     // Total number (current) of WriteOnly blocks and ReadPossible blocks
     int iTotalWriteOnly;
     int iTotalReadPoss;
     
     // MRU Queue and counter array for each type
-    int aSetQueueWriteOnly[32];
-    int aSetQueueReadPoss[32];
-    int aCounterWriteOnly[32];
-    int aCounterReadPoss[32];
-    
-    // Estimated Best ratio of WriteOnly blocks. value < [0, 1]
-    double dEstimBestRatio;
+    int aSetQueueWriteOnly[256];
+    int aSetQueueReadPoss[256];
+    int aCounterWriteOnly[256];
+    int aCounterReadPoss[256];
     
     // Constructors
     RWPTags(const Params *p);
-    ~RWPTags() {}
+    ~RWPTags();
     
     // Helper Functions
     void shiftQueue(int *aQueue, int *aCounter, bool toHead);
     void updateQueue(int *aQueue, int *aCounter, int iIndex, bool toHead);
-    void calculateBestRatio();
+    double calculateBestRatio(void) const;
     
     
-    BlkType* accessBlock(Addr addr, boll is_secure, Cycles &lat, int context_src);
-    BlkType* findVictim(Addr addr) const;
-    void insertBlcok(packetPtr pkt, BlkType *blk);
-    void invalidate(BlkType *blk);
+    CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat);
+    CacheBlk* findVictim(Addr addr) const;
+    void insertBlock(PacketPtr pkt, CacheBlk *blk);
+    void invalidate(CacheBlk *blk);
     
 };
 

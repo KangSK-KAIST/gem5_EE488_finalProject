@@ -89,7 +89,9 @@ class CacheBlk : public ReplaceableEntry
   public:
     /** Task Id associated with this block */
     uint32_t task_id;
-
+    
+    int set;
+    
     /** Data block tag value. */
     Addr tag;
     /**

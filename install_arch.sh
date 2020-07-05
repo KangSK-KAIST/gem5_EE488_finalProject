@@ -4,7 +4,7 @@
 INS_PATH=$(pwd)
 
 # Install packages
-sudo pacman -Syu gcc scons python-dev zlib m4 swig protobuf gperftools python-pip python-virtualenv python-six python2
+sudo pacman -Syu gcc scons zlib m4 swig protobuf gperftools python-pip python-virtualenv python-six python2
 
 # Make python environment
 cd $HOME/.pyenv || mkdir $HOME/.pyenv; cd $HOME/.pyenv
